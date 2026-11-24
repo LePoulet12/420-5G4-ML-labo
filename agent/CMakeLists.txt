@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
 project(bibliotheque)
 
-add_library(bibliotheque_core STATIC library.cpp book.cpp user.cpp filemanager.cpp)
+add_library(bibliotheque_core STATIC library.cpp book.cpp user.cpp filemanager.cpp activitylog.cpp)
 set_target_properties(bibliotheque_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_compile_features(bibliotheque_core PUBLIC cxx_std_17)
 
-add_executable(${PROJECT_NAME} main.cpp activitylog.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE bibliotheque_core)
 
 # Specifie qu'on veut la version C++17 du langage

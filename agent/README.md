@@ -23,12 +23,14 @@ les emprunts et les retours réussis sont ajoutés au fichier avec l’heure loc
 Un retour consigne le livre tel qu’il était avant le retour pour conserver le
 nom de l’emprunteur. Les entrées restent disponibles après chaque session.
 
-## Interface graphique : livres disponibles
+## Interface graphique
 
-La fenêtre CustomTkinter affiche le titre, l’auteur et l’ISBN des livres
-disponibles. Le module pybind11 réutilise le chargement, le filtre et le tri C++.
-Le bouton **Actualiser** relit `books.txt` après une sauvegarde dans le CLI.
-La fenêtre est en lecture seule.
+La fenêtre CustomTkinter reprend la disposition de `maquetteTPAI.png` :
+catalogue, utilisateurs, statistiques et sauvegardes. Elle permet de rechercher,
+trier, ajouter, supprimer, emprunter et retourner des livres, ainsi que d’ajouter
+et de consulter les utilisateurs. Les opérations et le journal utilisent le C++
+via pybind11. **Quitter** sauvegarde les données. Une copie `.backup` contient
+uniquement les données déjà sauvegardées sur disque.
 
 Dans le devcontainer, depuis la racine du dépôt (reconstruire le conteneur pour
 installer les en-têtes Python, si nécessaire) :
@@ -40,9 +42,12 @@ py=/tmp/bibliotheque-venv/bin/python
 cmake -S agent -B agent/build-gui -DBIBLIOTHEQUE_BUILD_PYTHON=ON \
   -DPython_EXECUTABLE="$py"
 cmake --build agent/build-gui
-PYTHONPATH="$PWD/agent/build-gui" "$py" agent/gui.py --data-dir agent/data
+scratch="$(mktemp -d)"
+cp agent/data/books.txt agent/data/users.txt "$scratch/"
+PYTHONPATH="$PWD/agent/build-gui" "$py" agent/gui.py --data-dir "$scratch"
 ```
 
 La fenêtre nécessite un serveur d’affichage accessible depuis le conteneur.
+Utilisez une seule session d’édition à la fois pour un même répertoire de données.
 Le CLI se compile toujours seul avec `cmake -S agent -B agent/build` puis
 `cmake --build agent/build`, sans dépendance Python.

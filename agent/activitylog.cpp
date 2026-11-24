@@ -1,8 +1,20 @@
 #include "activitylog.h"
+#include "library.h"
 
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+
+std::string activityBookDetails(const Book& book, Library& library) {
+    Book snapshot = book;
+    if (!book.getAvailability()) {
+        const User* borrower = library.findUserById(book.getBorrowerId());
+        if (borrower && !borrower->getName().empty()) {
+            snapshot.setBorrowerId(borrower->getName());
+        }
+    }
+    return snapshot.toFileFormat();
+}
 
 ActivityLog::ActivityLog(const std::filesystem::path& path)
     : file(path, std::ios::app) {

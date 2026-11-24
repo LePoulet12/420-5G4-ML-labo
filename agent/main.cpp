@@ -60,17 +60,6 @@ BookSortOrder getBookSortOrder() {
     return BookSortOrder::Catalog;
 }
 
-string activityBookDetails(const Book& book, Library& library) {
-    Book snapshot = book;
-    if (!book.getAvailability()) {
-        const User* borrower = library.findUserById(book.getBorrowerId());
-        if (borrower && !borrower->getName().empty()) {
-            snapshot.setBorrowerId(borrower->getName());
-        }
-    }
-    return snapshot.toFileFormat();
-}
-
 void printUsage(const char* programName) {
     cerr << "Usage: " << programName << " [--data-dir|-d <répertoire>]\n";
 }

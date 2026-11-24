@@ -5,6 +5,10 @@
 #include <fstream>
 #include <string>
 
+class Book;
+class Library;
+std::string activityBookDetails(const Book& book, Library& library);
+
 class ActivityLog {
 public:
     explicit ActivityLog(const std::filesystem::path& path);
