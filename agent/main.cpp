@@ -17,7 +17,7 @@ void pauseForInput() {
     cout << "\nAppuyez sur Entrée pour continuer...";
     cin.ignore();
     cin.get();
-}
+} 
 
 void displayMenu() {
     cout << "\n=== SYSTÈME DE GESTION DE BIBLIOTHÈQUE PERSONNELLE ===\n";
