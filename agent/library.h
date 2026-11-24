@@ -38,6 +38,7 @@ public:
     bool returnBook(const string& isbn);
     
     // Display methods
+    string formatBook(const Book& book);
     void displayAllBooks();
     void displayAvailableBooks();
     void displayAllUsers();
