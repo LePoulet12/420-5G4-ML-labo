@@ -1,7 +1,11 @@
+#include <algorithm>
 #include <filesystem>
+#include <optional>
 #include <stdexcept>
+#include <unordered_set>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "filemanager.h"
@@ -42,14 +46,24 @@ public:
         load("users.txt", &FileManager::loadUsersFromFile);
     }
 
-    py::list books(bool available, const std::string& query, bool byAuthor, BookSortOrder order) {
-        auto results = query.empty() ? (available ? library.getAvailableBooks() : library.getAllBooks())
-            : (byAuthor ? library.searchBooksByAuthor(query) : library.searchBooksByTitle(query));
+    py::list books(bool available, const std::string& query, std::optional<bool> byAuthor, BookSortOrder order) {
+        auto results = available ? library.getAvailableBooks() : library.getAllBooks();
+        if (!query.empty()) {
+            std::unordered_set<Book*> matches;
+            if (!byAuthor.value_or(false)) {
+                const auto titles = library.searchBooksByTitle(query);
+                matches.insert(titles.begin(), titles.end());
+            }
+            if (byAuthor.value_or(true)) {
+                const auto authors = library.searchBooksByAuthor(query);
+                matches.insert(authors.begin(), authors.end());
+            }
+            results.erase(std::remove_if(results.begin(), results.end(), [&](Book* book) {
+                return matches.count(book) == 0;
+            }), results.end());
+        }
         py::list rows;
         for (const Book* book : Library::sortBooksForDisplay(std::move(results), order)) {
-            if (available && !book->getAvailability()) {
-                continue;
-            }
             std::string borrower = book->getBorrowerId();
             if (const auto* user = library.findUserById(borrower); user && !user->getName().empty()) {
                 borrower = user->getName();

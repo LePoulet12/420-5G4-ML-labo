@@ -86,10 +86,6 @@ class BooksWindow(ctk.CTk):
         self.status = ctk.CTkLabel(footer, text="", anchor="w", text_color=INK,
                                    wraplength=310, justify="left")
         self.status.pack(side="left", fill="x", expand=True, padx=18)
-        self.button(footer, "Créer une sauvegarde", self.backup, outline=True).pack(
-            side="right", padx=(0, 14), pady=12)
-        self.button(footer, "Sauvegarder les données", self.save, outline=True).pack(
-            side="right", padx=10, pady=12)
         self.content = ctk.CTkFrame(main, fg_color="transparent")
         self.content.pack(fill="both", expand=True, padx=20, pady=18)
 
@@ -122,7 +118,7 @@ class BooksWindow(ctk.CTk):
         ctk.CTkLabel(header, text=name, text_color=INK,
                      font=ctk.CTkFont(size=38, weight="bold")).pack(side="left")
         if name == "Catalogue":
-            self.catalog_page(header)
+            self.catalog_page()
         elif name == "Utilisateurs":
             self.users_page(header)
         elif name == "Statistiques":
@@ -155,8 +151,7 @@ class BooksWindow(ctk.CTk):
         table.tag_configure("alternate", background="#e7eddf")
         return table
 
-    def catalog_page(self, header):
-        self.button(header, "Ajouter un livre", self.add_book).pack(side="right")
+    def catalog_page(self):
         filters = ctk.CTkFrame(self.content, fg_color="transparent")
         filters.pack(fill="x", pady=(0, 12))
         self.scope = ctk.CTkSegmentedButton(
@@ -173,13 +168,10 @@ class BooksWindow(ctk.CTk):
 
         search = ctk.CTkFrame(self.content, fg_color="transparent")
         search.pack(fill="x", pady=(0, 14))
-        self.query = ctk.CTkEntry(search, placeholder_text="Rechercher un livre", height=36)
+        self.query = ctk.CTkEntry(search, placeholder_text="Rechercher par titre ou auteur", height=36)
         self.query.pack(side="left", fill="x", expand=True)
         self.query.bind("<Return>", self.refresh_books)
-        self.search_by = ctk.CTkComboBox(search, values=["Titre", "Auteur"], state="readonly",
-                                          width=115)
-        self.search_by.set("Titre")
-        self.search_by.pack(side="left", padx=10)
+        self.button(search, "Ajouter un livre", self.add_book).pack(side="left", padx=10)
         self.button(search, "Rechercher", self.refresh_books).pack(side="left")
         self.book_table = self.table({"Titre": 200, "Auteur": 180, "ISBN": 120, "État": 170})
         self.book_table.bind("<<TreeviewSelect>>", self.update_actions)
@@ -197,7 +189,7 @@ class BooksWindow(ctk.CTk):
     def refresh_books(self, _event=None):
         try:
             rows = self.session.books(self.scope.get() == "Livres disponibles", self.query.get(),
-                                      self.search_by.get() == "Auteur",
+                                      None,
                                       self.SORT_ORDERS[self.sort.get()])
         except (RuntimeError, UnicodeError) as error:
             messagebox.showerror("Catalogue", str(error), parent=self)
