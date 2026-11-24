@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
 project(bibliotheque)
 
-file(GLOB SOURCES "*.cpp")
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME}
+    main.cpp library.cpp book.cpp user.cpp filemanager.cpp activitylog.cpp
+)
 
 # Specifie qu'on veut la version C++17 du langage
 set_target_properties(${PROJECT_NAME} PROPERTIES

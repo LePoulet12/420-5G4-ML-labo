@@ -5,6 +5,7 @@
 
 #include "library.h"
 #include "filemanager.h"
+#include "activitylog.h"
 
 using namespace std;
 
@@ -59,6 +60,17 @@ BookSortOrder getBookSortOrder() {
     return BookSortOrder::Catalog;
 }
 
+string activityBookDetails(const Book& book, Library& library) {
+    Book snapshot = book;
+    if (!book.getAvailability()) {
+        const User* borrower = library.findUserById(book.getBorrowerId());
+        if (borrower && !borrower->getName().empty()) {
+            snapshot.setBorrowerId(borrower->getName());
+        }
+    }
+    return snapshot.toFileFormat();
+}
+
 void printUsage(const char* programName) {
     cerr << "Usage: " << programName << " [--data-dir|-d <répertoire>]\n";
 }
@@ -96,6 +108,7 @@ int main(int argc, char* argv[]) {
 
     Library library;
     FileManager fileManager(booksFile, usersFile);
+    ActivityLog activityLog(filesystem::path(dataDir) / "activity.log");
     
     // Load existing data
     cout << "Chargement des données de la bibliothèque...\n";
@@ -127,6 +140,7 @@ int main(int argc, char* argv[]) {
                 } else {
                     Book newBook(title, author, isbn);
                     library.addBook(newBook);
+                    activityLog.record("AJOUT LIVRE", activityBookDetails(newBook, library));
                     cout << "Livre ajouté avec succès !\n";
                 }
                 pauseForInput();
@@ -136,7 +150,10 @@ int main(int argc, char* argv[]) {
             case 2: { // Remove Book
                 string isbn = getInput("Entrez l'ISBN du livre à supprimer : ");
                 
+                const Book* book = library.findBookByISBN(isbn);
+                const string details = book ? activityBookDetails(*book, library) : "";
                 if (library.removeBook(isbn)) {
+                    activityLog.record("SUPPRESSION LIVRE", details);
                     cout << "Livre supprimé avec succès !\n";
                 } else {
                     cout << "Livre non trouvé.\n";
@@ -217,7 +234,9 @@ int main(int argc, char* argv[]) {
                 string isbn = getInput("Entrez l'ISBN du livre à emprunter : ");
                 string userId = getInput("Entrez l'ID de l'utilisateur : ");
                 
+                const Book* book = library.findBookByISBN(isbn);
                 if (library.checkOutBook(isbn, userId)) {
+                    activityLog.record("EMPRUNT", activityBookDetails(*book, library));
                     cout << "Livre emprunté avec succès !\n";
                 } else {
                     cout << "Erreur : Impossible d'emprunter le livre. Vérifiez l'ISBN, l'ID utilisateur et la disponibilité du livre.\n";
@@ -229,7 +248,10 @@ int main(int argc, char* argv[]) {
             case 10: { // Return Book
                 string isbn = getInput("Entrez l'ISBN du livre à retourner : ");
                 
+                const Book* book = library.findBookByISBN(isbn);
+                const string details = book ? activityBookDetails(*book, library) : "";
                 if (library.returnBook(isbn)) {
+                    activityLog.record("RETOUR", details);
                     cout << "Livre retourné avec succès !\n";
                 } else {
                     cout << "Erreur : Impossible de retourner le livre. Vérifiez l'ISBN et que le livre est bien emprunté.\n";
