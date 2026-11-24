@@ -271,7 +271,9 @@ int main(int argc, char* argv[]) {
             }
             
             case 12: { // Save Data
-                if (fileManager.saveLibraryData(library)) {
+                if (!fileManager.hasDataPaths()) {
+                    cout << "Sauvegarde ignorée : aucun répertoire de données configuré (--data-dir).\n";
+                } else if (fileManager.saveLibraryData(library)) {
                     cout << "Données de la bibliothèque sauvegardées avec succès !\n";
                 } else {
                     cout << "Erreur lors de la sauvegarde des données de la bibliothèque.\n";
@@ -287,8 +289,14 @@ int main(int argc, char* argv[]) {
             }
             
             case 0: // Exit
-                cout << "Sauvegarde des données avant la fermeture...\n";
-                fileManager.saveLibraryData(library);
+                if (!fileManager.hasDataPaths()) {
+                    cout << "Sauvegarde ignorée : aucun répertoire de données configuré (--data-dir).\n";
+                } else {
+                    cout << "Sauvegarde des données avant la fermeture...\n";
+                    if (!fileManager.saveLibraryData(library)) {
+                        cout << "Erreur lors de la sauvegarde des données de la bibliothèque.\n";
+                    }
+                }
                 cout << "Merci d'avoir utilisé le Système de Gestion de Bibliothèque Personnelle !\n";
                 running = false;
                 break;
