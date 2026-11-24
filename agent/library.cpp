@@ -156,24 +156,38 @@ string Library::formatBook(const Book& book) {
     return book.toString();
 }
 
+vector<Book*> Library::sortBooksForDisplay(vector<Book*> results, BookSortOrder order) {
+    if (order == BookSortOrder::Title) {
+        stable_sort(results.begin(), results.end(), [](const Book* left, const Book* right) {
+            return left->getTitle() < right->getTitle();
+        });
+    } else if (order == BookSortOrder::Author) {
+        stable_sort(results.begin(), results.end(), [](const Book* left, const Book* right) {
+            return left->getAuthor() < right->getAuthor();
+        });
+    }
+    return results;
+}
+
 // Display all books
-void Library::displayAllBooks() {
-    if (books.empty()) {
+void Library::displayAllBooks(BookSortOrder order) {
+    auto results = sortBooksForDisplay(getAllBooks(), order);
+    if (results.empty()) {
         cout << "Aucun livre dans la bibliothèque.\n";
         return;
     }
     
     cout << "\n=== TOUS LES LIVRES ===\n";
-    for (size_t i = 0; i < books.size(); ++i) {
+    for (size_t i = 0; i < results.size(); ++i) {
         cout << "\nLivre " << (i + 1) << " :\n";
-        cout << formatBook(*books[i]) << "\n";
+        cout << formatBook(*results[i]) << "\n";
         cout << "-------------------------\n";
     }
 }
 
 // Display available books
-void Library::displayAvailableBooks() {
-    auto available = getAvailableBooks();
+void Library::displayAvailableBooks(BookSortOrder order) {
+    auto available = sortBooksForDisplay(getAvailableBooks(), order);
     
     if (available.empty()) {
         cout << "Aucun livre disponible pour emprunt.\n";

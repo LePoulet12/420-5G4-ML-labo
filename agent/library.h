@@ -9,6 +9,8 @@
 
 using namespace std;
 
+enum class BookSortOrder { Catalog, Title, Author };
+
 class Library {
 private:
     vector<unique_ptr<Book>> books;
@@ -39,8 +41,9 @@ public:
     
     // Display methods
     string formatBook(const Book& book);
-    void displayAllBooks();
-    void displayAvailableBooks();
+    static vector<Book*> sortBooksForDisplay(vector<Book*> results, BookSortOrder order);
+    void displayAllBooks(BookSortOrder order = BookSortOrder::Catalog);
+    void displayAvailableBooks(BookSortOrder order = BookSortOrder::Catalog);
     void displayAllUsers();
     
     // Statistics
